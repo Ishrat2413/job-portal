@@ -44,6 +44,12 @@ const jobSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
+    applications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Application",
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,

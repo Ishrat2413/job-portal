@@ -44,7 +44,13 @@ export const postJob = async (req, res) => {
       isActive: true,
     });
     await job.save();
-
+    const user = await User.findById(userId);
+    if (user.role === "employer" && !user.isApproved) {
+      return res.status(403).json({
+        message: "Your account is pending approval by admin.",
+        success: false,
+      });
+    }
     return res.status(201).json({
       message: "Job Posted Successfully",
       success: true,
@@ -66,12 +72,14 @@ export const getAllJobs = async (req, res) => {
     const query = {
       $or: [
         { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } }
+        { description: { $regex: keyword, $options: "i" } },
       ],
     };
-    const jobs = await Job.find(query).populate({
+    const jobs = await Job.find(query)
+      .populate({
         path: "employer",
-    }).sort({createdAt:-1});
+      })
+      .sort({ createdAt: -1 });
     if (!jobs) {
       return res.status(404).json({
         message: "No Jobs Found!",
@@ -95,9 +103,11 @@ export const getAllJobs = async (req, res) => {
 export const getJobById = async (req, res) => {
   try {
     const jobId = req.params.id;
-    const job = await Job.findById(jobId).populate({
+    const job = await Job.findById(jobId)
+      .populate({
         path: "employer",
-    }).sort({createdAt:-1});;;
+      })
+      .sort({ createdAt: -1 });
     if (!job) {
       return res.status(404).json({
         message: "No Jobs Found!",
@@ -121,9 +131,11 @@ export const getJobById = async (req, res) => {
 export const getEmployerJobs = async (req, res) => {
   try {
     const adminId = req.id;
-    const jobs = await Job.find({ employer: adminId }).populate({
+    const jobs = await Job.find({ employer: adminId })
+      .populate({
         path: "employer",
-    }).sort({createdAt:-1});;
+      })
+      .sort({ createdAt: -1 });
     if (!jobs) {
       return res.status(404).json({
         message: "No Jobs Found!",

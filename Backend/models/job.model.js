@@ -12,10 +12,23 @@ const jobSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    description: {
+      type: String,
+      required: true,
+    },
     location: {
       type: String,
       required: true,
       trim: true,
+    },
+    requirements: [
+      {
+        type: String,
+      },
+    ],
+    experience: {
+      type: Number,
+      required: true,
     },
     jobType: {
       type: String,
@@ -23,10 +36,6 @@ const jobSchema = mongoose.Schema(
       required: true,
     },
     salaryRange: {
-      type: String,
-      required: true,
-    },
-    description: {
       type: String,
       required: true,
     },

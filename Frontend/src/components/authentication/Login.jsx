@@ -21,49 +21,22 @@ const Login = () => {
         setInput({ ...input, [e.target.name]: e.target.value });
     };
 
-
-    // const submitHandler = async (e) => {
-    //     e.preventDefault();
-    //     console.log("login",input)
-    //     setLoading(true);
-
-    //     try {
-    //         dispatch(setLoading(true))
-    //         const res = await axios.post(`${USER_API_ENDPOINT}/login`, input, {
-    //             headers: { "Content-Type": "application/json" },
-    //             withCredentials: true,
-    //         });
-    //         console.log('Login response:', res.data);
-    //         if (res.data.success) {
-    //             console.log('Dispatching user:', res.data.user)
-    //             dispatch(setUser(res.data.user))
-    //             navigate("/")
-    //             toast.success(res.data.message)
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         const errorMessage = error.message ? error.response.data.message : "Unexpected error Occurred"
-    //         toast.error(errorMessage)
-    //     } finally {
-    //         dispatch(setLoading(false))
-    //     }
-    // };
-
     const submitHandler = async (e) => {
         e.preventDefault();
-        console.log('Login input:', input);
+        // console.log('Login input:', input);
+        let role = input.role;
+        if (input.email.includes('@admin.') || input.email === 'admin@jobportal.com') {
+            role = 'admin';
+        }
 
         try {
             dispatch(setLoading(true));
-            const res = await axios.post(`${USER_API_ENDPOINT}/login`, input, {
+            const res = await axios.post(`${USER_API_ENDPOINT}/login`, {...input, role:role}, {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });
 
-            console.log('Login response:', res.data);
-
             if (res.data.success) {
-                console.log('Dispatching user:', res.data.user);
                 dispatch(setUser(res.data.user));
                 navigate("/");
                 toast.success(res.data.message);
@@ -128,8 +101,8 @@ const Login = () => {
                                     <input
                                         type="radio"
                                         name="role"
-                                        value="Employer"
-                                        checked={input.role === "Employer"}
+                                        value="employer"
+                                        checked={input.role === "employer"}
                                         onChange={changeEventHandler}
                                         className="w-4 h-4"
                                     />

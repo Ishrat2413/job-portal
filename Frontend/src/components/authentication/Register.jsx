@@ -5,7 +5,6 @@ import axios from 'axios';
 import { USER_API_ENDPOINT } from '@/utils/data.js';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
-// import store from '@/redux/store';
 import { setLoading } from '@/redux/authSlice';
 
 const Register = () => {
@@ -14,7 +13,7 @@ const Register = () => {
         email: "",
         password: "",
         role: "",
-        file: ""
+        file: null
     });
 
     const navigate = useNavigate();
@@ -31,7 +30,7 @@ const Register = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        console.log(input)
+        // console.log(input)
         setLoading(true);
 
         const formData = new FormData();
@@ -125,8 +124,8 @@ const Register = () => {
                                     <input
                                         type="radio"
                                         name="role"
-                                        value="Employer"
-                                        checked={input.role === "Employer"}
+                                        value="employer"
+                                        checked={input.role === "employer"}
                                         onChange={changeEventHandler}
                                         className="w-4 h-4"
                                     />

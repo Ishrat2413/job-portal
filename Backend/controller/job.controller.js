@@ -1,4 +1,5 @@
 import { Job } from "../models/job.model.js";
+import {User} from "../models/user.model.js"
 
 // Employer Job Post
 export const postJob = async (req, res) => {
@@ -39,8 +40,8 @@ export const postJob = async (req, res) => {
       requirements: requirements || [],
       jobType,
       salaryRange,
-      employer: userId,
-      experience,
+      employer: req.id,
+      experience: parseInt(experience),
       isActive: true,
     });
     await job.save();

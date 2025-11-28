@@ -1,6 +1,8 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import getDataUri from "../utils/datauri.js";
+import cloudinary from "../utils/cloud.js";
 
 export const register = async (req, res) => {
   try {
@@ -10,6 +12,13 @@ export const register = async (req, res) => {
         message: "Missing Required Fields",
         success: false,
       });
+    }
+    let profilePhoto = "";
+    const file = req.file;
+    if (file) {
+      const fileUri = getDataUri(file);
+      const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+      profilePhoto = cloudResponse.secure_url;
     }
     const user = await User.findOne({ email });
     if (user) {
@@ -26,6 +35,9 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      profile: {
+        profilePhoto: profilePhoto,
+      },
     });
     // saved user
     await newUser.save();
@@ -134,46 +146,65 @@ export const logout = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { fullName, email, bio, profile } = req.body;
+    // console.log("Full req.body:", req.body);
+    const skills =
+      req.body.skills ||
+      (req.body["skills[]"] ? JSON.parse(req.body["skills[]"]) : []);
+    const fullName = req.body.fullName || req.body["fullName[]"];
+    const email = req.body.email || req.body["email[]"];
+    const bio = req.body.bio || req.body["bio[]"];
+
     const file = req.file;
-    console.log("Received profile:", profile);
-
     // cloudinary upload
-    let skillsArray;
-    // if (skills) {
-    //   skillsArray = skills.split(",");
-    // }
+    let cloudinaryResponse = null;
 
-    const userId = req.id; // coming from middleware authentication
+    if (file) {
+      console.log("Processing file upload...");
+      const fileUri = getDataUri(file);
+      cloudinaryResponse = await cloudinary.uploader.upload(fileUri.content);
+      console.log("Cloudinary upload successful");
+    }
+
+    const userId = req.id;
     let user = await User.findById(userId);
+
     if (!user) {
       return res.status(400).json({
         message: "User not Found!",
         success: false,
       });
     }
-    // update database
-    if (fullName) {
-      user.fullName = fullName;
-    }
-    if (email) {
-      user.email = email;
-    }
-    if (bio) {
-      user.profile.bio = bio;
-    }
-    // if (skills) {
-    //   console.log("Setting skills to:", skills); 
-    //   user.profile.skills = skills;
-    // }
-    if (profile) {
-      if (profile.bio) user.profile.bio = profile.bio;
-      if (profile.skills) user.profile.skills = profile.skills;
+
+    // Update fields
+    if (fullName) user.fullName = fullName;
+    if (email) user.email = email;
+    if (bio) user.profile.bio = bio;
+
+    // Handle skills
+    if (skills) {
+      const skillsArray =
+        typeof skills === "string"
+          ? skills
+              .split(",")
+              .map((skill) => skill.trim())
+              .filter((skill) => skill !== "")
+          : skills;
+      user.profile.skills = skillsArray;
     }
 
-    // resume later
+    // Handle file
+    // if (req.file) {
+    //   user.profile.resume = `uploads/${req.file.originalname}`;
+    //   user.profile.resumeOriginalName = req.file.originalname;
+    // }
+
+    if (cloudinaryResponse && file) {
+      user.profile.resume = cloudinaryResponse.secure_url;
+      user.profile.resumeOriginalName = file.originalname;
+    }
     await user.save();
-    user = {
+
+    const userResponse = {
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
@@ -183,13 +214,13 @@ export const updateProfile = async (req, res) => {
 
     return res.status(200).json({
       message: "Profile Updated Successfully!",
-      user,
+      user: userResponse,
       success: true,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Update profile error:", error);
     res.status(500).json({
-      message: "Server Error",
+      message: "Server Error updating profile",
       success: false,
     });
   }

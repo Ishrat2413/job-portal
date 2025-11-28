@@ -5,20 +5,20 @@ import { Application } from "../models/application.model.js";
 // Get pending employers
 export const getPendingEmployers = async (req, res) => {
   try {
-    const employers = await User.find({ 
-      role: "employer", 
+    const pendingEmployers = await User.find({ 
+      role: 'employer', 
       isApproved: false 
-    }).select("-password");
+    }).select('-password');
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-      employers,
+      employers: pendingEmployers
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching pending employers:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };
@@ -27,29 +27,30 @@ export const getPendingEmployers = async (req, res) => {
 export const approveEmployer = async (req, res) => {
   try {
     const employerId = req.params.id;
+
     const employer = await User.findByIdAndUpdate(
       employerId,
       { isApproved: true },
       { new: true }
-    ).select("-password");
+    ).select('-password');
 
     if (!employer) {
       return res.status(404).json({
-        message: "Employer not found!",
         success: false,
+        message: 'Employer not found'
       });
     }
 
-    return res.status(200).json({
-      message: "Employer approved successfully!",
+    res.status(200).json({
       success: true,
-      employer,
+      message: 'Employer approved successfully',
+      employer
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error approving employer:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };
@@ -57,115 +58,122 @@ export const approveEmployer = async (req, res) => {
 // Get all users
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
-    return res.status(200).json({
+    const users = await User.find().select('-password');
+
+    res.status(200).json({
       success: true,
-      users,
+      users
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching users:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };
 
-// Block/unblock user
+// Block user
 export const blockUser = async (req, res) => {
   try {
     const userId = req.params.id;
+
     const user = await User.findByIdAndUpdate(
       userId,
       { isBlocked: true },
       { new: true }
-    ).select("-password");
+    ).select('-password');
 
     if (!user) {
       return res.status(404).json({
-        message: "User not found!",
         success: false,
+        message: 'User not found'
       });
     }
 
-    return res.status(200).json({
-      message: "User blocked successfully!",
+    res.status(200).json({
       success: true,
-      user,
+      message: 'User blocked successfully',
+      user
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error blocking user:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };
 
+// Unblock user
 export const unblockUser = async (req, res) => {
   try {
     const userId = req.params.id;
+
     const user = await User.findByIdAndUpdate(
       userId,
       { isBlocked: false },
       { new: true }
-    ).select("-password");
+    ).select('-password');
 
     if (!user) {
       return res.status(404).json({
-        message: "User not found!",
         success: false,
+        message: 'User not found'
       });
     }
 
-    return res.status(200).json({
-      message: "User unblocked successfully!",
+    res.status(200).json({
       success: true,
-      user,
+      message: 'User unblocked successfully',
+      user
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error unblocking user:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };
 
-// Get all jobs (admin view)
+// Get all jobs for admin
 export const getAllJobsAdmin = async (req, res) => {
   try {
-    const jobs = await Job.find().populate("employer", "fullName email");
-    return res.status(200).json({
+    const jobs = await Job.find()
+      .populate('employer', 'fullName email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
       success: true,
-      jobs,
+      jobs
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching jobs:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };
 
-// Get all applications (admin view)
+// Get all applications
 export const getAllApplications = async (req, res) => {
   try {
     const applications = await Application.find()
-      .populate("job", "title company")
-      .populate("applicant", "fullName email")
+      .populate('job', 'title company')
+      .populate('applicant', 'fullName email')
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-      applications,
+      applications
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching applications:', error);
     res.status(500).json({
-      message: "Server Error",
       success: false,
+      message: 'Server error'
     });
   }
 };

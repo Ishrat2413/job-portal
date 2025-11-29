@@ -153,7 +153,7 @@ export const getApplicants = async (req, res) => {
       });
     }
 
-    console.log("Job with populated applications:", job);
+    // console.log("Job with populated applications:", job);
 
     return res.status(200).json({
       success: true,

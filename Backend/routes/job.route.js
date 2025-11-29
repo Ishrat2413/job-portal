@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.route("/post").post(authenticateToken, postJob);
-router.route("/get").get(authenticateToken, getAllJobs);
+router.route("/get").get( getAllJobs);
 router.route("/getEmployerJobs").get(authenticateToken, getEmployerJobs);
 router.route("/get/:id").get(authenticateToken, getJobById);
 

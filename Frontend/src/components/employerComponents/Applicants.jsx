@@ -21,7 +21,7 @@ const Applicants = () => {
           `${APPLICATION_API_ENDPOINT}/${params.id}/applicants`,
           { withCredentials: true }
         );
-        console.log("API Response:", res.data);
+        // console.log("API Response:", res.data);
         
         if (res.data.success) {
           // Dispatch the entire job data which includes applications
